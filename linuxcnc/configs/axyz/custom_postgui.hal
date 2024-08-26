@@ -1,0 +1,25 @@
+# Include your custom_postgui HAL commands here
+# This file will not be overwritten when you run PNCconf again
+
+# net spindle-at-speed => pyvcp.spindle-at-speed
+# net pyvcp-spindle-rpm spindle-vfd.spindle-speed-fb => pyvcp.spindle-speed
+# net pyvcp-modbus-ok spindle-vfd.hycomm-ok => pyvcp.hycomm-ok
+
+
+loadrt time
+addf time.0 servo-thread
+#net cycle-timer time.0.start <= halui.program.is-running
+# net cycle-timer-pause time.0.pause <= halui.program.is-paused
+net cycle-seconds pyvcp.time-seconds <= time.0.seconds
+net cycle-minutes pyvcp.time-minutes <= time.0.minutes
+net cycle-hours pyvcp.time-hours <= time.0.hours
+
+
+# vacuum pump toggle button
+net vacuum-pump pyvcp.vacuum-pump => hm2_7i76e.0.7i76.0.0.output-07
+#net vacuum-pump => whb.button.macro-10
+
+# Z Probe touch
+# Actual code is in ../subroutines/z_touch.ngc
+# net signal-name pin-name <optional arrow> <optional second pin-name>
+#net ztouch halui.mdi-command-08 <= pyvcp.ztouch

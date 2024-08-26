@@ -1,0 +1,32 @@
+# Include your custom HAL commands here
+# This file will not be overwritten when you run PNCconf again
+
+
+# estop from https://forum.linuxcnc.org/47-hal-examples/25861-external-e-stop
+loadrt estop_latch
+addf estop-latch.0 servo-thread
+net estop-loopout iocontrol.0.emc-enable-in <= estop-latch.0.ok-out
+net estop-loopin iocontrol.0.user-enable-out => estop-latch.0.ok-in
+net estop-reset iocontrol.0.user-request-enable => estop-latch.0.reset
+net remote-estop estop-latch.0.fault-in <=  hm2_7i76e.0.7i76.0.0.input-08-not
+
+
+
+# Wait for SPINDLE AT SPEED
+# load a near component and attach it to a thread
+loadrt near
+addf near.0 servo-thread
+
+# connect one input to the commanded spindle speed
+net spindle-cmd => near.0.in1
+
+# connect one input to the encoder-measured spindle speed
+net spindle-velocity => near.0.in2
+
+# connect the output to the spindle-at-speed input
+net spindle-at-speed spindle.0.at-speed <= near.0.out
+
+# set the spindle speed inputs to agree if within 1%
+setp near.0.scale 1.01
+
+
