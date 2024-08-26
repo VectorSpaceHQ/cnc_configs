@@ -1,0 +1,3 @@
+https://forum.linuxcnc.org/27-driver-boards/39744-question-about-the-hal-configuration
+mesaflash --device 7i92 --addr 192.168.1.121 --write 7i92_7i77_7i85sd.bit 
+mesaflash --device 7i92 --addr 192.168.1.121 --readhmid
