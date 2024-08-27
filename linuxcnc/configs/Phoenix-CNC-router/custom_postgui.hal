@@ -1,0 +1,21 @@
+# Include your custom_postgui HAL commands here
+# This file will not be overwritten when you run PNCconf again
+
+net spindle-at-speed => pyvcp.spindle-at-speed
+net pyvcp-spindle-rpm spindle-vfd.spindle-speed-fb => pyvcp.spindle-speed
+net pyvcp-modbus-ok spindle-vfd.hycomm-ok => pyvcp.hycomm-ok
+
+
+loadrt time
+addf time.0 servo-thread
+net cycle-timer time.0.start <= halui.program.is-running
+# net cycle-timer-pause time.0.pause <= halui.program.is-paused
+net cycle-seconds pyvcp.time-seconds <= time.0.seconds
+net cycle-minutes pyvcp.time-minutes <= time.0.minutes
+net cycle-hours pyvcp.time-hours <= time.0.hours
+
+# Z Probe
+# Actual code is in ../subroutines/z_touch.ngc
+net ztouch halui.mdi-command-03 <= pyvcp.ztouch 
+
+
