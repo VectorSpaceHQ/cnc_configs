@@ -12,7 +12,7 @@ setp     hm2_5i25.0.watchdog.timeout_ns 10000000
 loadrt debounce cfg=1
 
 addf debounce.0 servo-thread
-setp debounce.0.delay 10
+setp debounce.0.delay 100
 addf hm2_5i25.0.read servo-thread
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
