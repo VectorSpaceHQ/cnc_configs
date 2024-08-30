@@ -17,9 +17,11 @@ net cycle-hours pyvcp.time-hours <= time.0.hours
 
 # vacuum pump toggle button
 net vacuum-pump pyvcp.vacuum-pump => hm2_7i76e.0.7i76.0.0.output-07
-#net vacuum-pump => whb.button.macro-10
+#net vacuum-pump pyvcp.vacuum-pump whb.button.macro-10 => hm2_7i76e.0.7i76.0.0.output-07
+#net vacuum-pump => whb.button.macro-10 hm2_7i76e.0.7i76.0.0.output-07
 
 # Z Probe touch
 # Actual code is in ../subroutines/z_touch.ngc
-# net signal-name pin-name <optional arrow> <optional second pin-name>
-#net ztouch halui.mdi-command-08 <= pyvcp.ztouch
+net gui_ztouch <= pyvcp.ztouch  or2.0.in0
+net gui_and_pdnt_zprobe  or2.0.out
+net gui_and_pdnt_zprobe halui.mdi-command-08

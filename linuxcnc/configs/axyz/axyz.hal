@@ -10,7 +10,9 @@ loadrt hm2_eth board_ip="192.168.1.121" config=" num_encoders=1 num_pwmgens=0 nu
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s
 loadrt debounce cfg=1
+loadrt or2 count=1
 
+addf or2.0                   servo-thread
 addf debounce.0               servo-thread
 addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
@@ -22,7 +24,8 @@ addf pid.s.do-pid-calcs       servo-thread
 addf hm2_7i76e.0.write         servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
 setp hm2_7i76e.0.stepgen.timer-number 1
-setp debounce.0.delay 10
+setp debounce.0.delay 100
+
 
 # external output signals
 
@@ -286,8 +289,9 @@ net jog-speed             halui.axis.jog-speed
 #net coolant-flood     <=  iocontrol.0.coolant-flood
 
 #  ---probe signal---
-# net probe-in     =>  motion.probe-input
-#net probe hm2_7i76e.0.7i76.0.0.input-16-not => motion.probe-input
+# When I press probe-z on the pendant (whb.button.probe-z), that get's stored in the pdnt.button.probe-z signal and output to the or2.0.in1 pin so that it can later be ORed with the gui button. The signal named "probe" has been tied to the input pin hm2_7i76e.0.7i76.0.0.input-16-not. That probe signal is sent out to a debounce variable named debounce.0.0.in. The output of the debounce routing is named debounce.0.0.out, which is stored in a new signal named probe-debounced. The probe-debounced signal is then sent to the magic motion.probe-input pin, which linuxCNC knows to watch for behind the scenes.
+# the xml "Touch off Z" button does not work by connecting to hal pin halui.mdi-command-08, which one would expect, given that this is how the pendant works. Instead, <halpin> is giving a pin name to the button, which is pyvcp.ztouch.
+# halui.mdi-command-08 is a magic pin name for the 8th MDI_COMMAND listed in axyz.ini, which is to call the z_touch.ngc subroutine. 
 net probe <= hm2_7i76e.0.7i76.0.0.input-16-not
 net probe => debounce.0.0.in
 net probe-debounced <= debounce.0.0.out
