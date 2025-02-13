@@ -7,6 +7,23 @@
     <text>"Touch Off Z"</text>
     <font>("Helvetica",16)</font>
   </button>
+
+  	<labelframe text="Probe State">
+		<font>("Helvetica",12)</font>
+  <led>
+	<halpin>"probe-debounced-gui"</halpin>
+	<size>"10"</size>
+	<on_color>"green"</on_color>
+	<off_color>"red"</off_color>
+  </led>
+  <led>
+	<halpin>"probe-digital-out"</halpin>
+	<size>"10"</size>
+	<on_color>"green"</on_color>
+	<off_color>"red"</off_color>
+  </led>  
+	</labelframe>
+	
 	<labelframe text="Huanyang VFD">
 		<font>("Helvetica",12)</font>
 		<table>

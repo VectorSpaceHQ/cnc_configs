@@ -16,6 +16,19 @@ net cycle-hours pyvcp.time-hours <= time.0.hours
 
 # Z Probe
 # Actual code is in ../subroutines/z_touch.ngc
-net ztouch halui.mdi-command-03 <= pyvcp.ztouch 
+net ztouch halui.mdi-command-03 <= pyvcp.ztouch
+
+
+# if ztouch clicked and debounce.0.0.out true, then call mdi-command-03
+# can't connect to debounce.0.0.out twice, so 
+# net ztouch-gui-and-in  pyvcp.ztouch   ztouch_and.in0
+# net ztouch-gui-and-probe-in  tool-probe.out  ztouch_and.in1
+# net ztouch-gui-and-probe-out  ztouch_and.out
+# net ztouch-gui-and-probe-out halui.mdi-command-03 <= pyvcp.ztouch
+
+net probe-and-M64 <= pyvcp.probe-debounced-gui
+net M64-and-in <= pyvcp.probe-digital-out
+
+
 
 
