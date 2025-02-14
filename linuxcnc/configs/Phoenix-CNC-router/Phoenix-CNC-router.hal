@@ -22,6 +22,7 @@ addf hm2_5i25.0.write         servo-thread
 addf tool-probe servo-thread
 addf ztouch_and servo-thread
 
+
 # external output signals
 setp hm2_5i25.0.gpio.002.is_output TRUE
 
@@ -196,12 +197,17 @@ net probe => debounce.0.0.in
 #net probe-debounced <= debounce.0.0.out
 #net probe-debounced  => motion.probe-input
 
+# Can't figure out another way to use this debounce pin twice.
+#net another-debounce1  debounce.0.0.out   or2.0.in0
+#net another-debounce2  FALSE              or2.0.in1
+# #net another-debounce   or2.0.out
+
+
 net M64-and-in               motion.digital-out-00                 tool-probe.in0
 net probe-sensor-and-in      debounce.0.0.out          		   tool-probe.in1
+#net probe-sensor-and-in      or2.0.in0          		   tool-probe.in1
 net probe-and-M64 	     tool-probe.out
 net probe-and-M64	     motion.probe-input
-
-
 
 
 #  ---motion control signals---
