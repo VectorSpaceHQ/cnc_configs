@@ -1,0 +1,37 @@
+loadrt debounce cfg=1,1
+addf debounce.0 servo-thread
+addf debounce.1 servo-thread
+setp debounce.0.delay 100
+setp debounce.1.delay 100
+addf ztouch_or servo-thread
+
+#  ---probe signal---
+#net probe hm2_5i25.0.7i84.0.0.input-08-not => motion.probe-input
+net probe <= hm2_5i25.0.7i84.0.0.input-08-not
+net probe => debounce.0.0.in
+#net probe-debounced <= debounce.0.0.out
+#net probe-debounced  => motion.probe-input
+
+# Can't figure out another way to use this debounce pin twice.
+#net probe2 debounce.0.0.out => debounce.1.0.in
+# net another-debounce1  debounce.0.0.out   ztouch_or.in0
+# net another-debounce2  debounce.0.0.out   ztouch_or.in1
+# #net another-debounce   ztouch_or.out
+
+# Z Probe
+# Actual code is in ../subroutines/z_touch.ngc
+#net ztouch halui.mdi-command-03 <= pyvcp.ztouch
+net ztouch ztouch_clicked_and.in0 <= pyvcp.ztouch
+net ztouch2 ztouch_clicked_and.in1 <= debounce.0.0.out
+net ztouch3 halui.mdi-command-03 <= ztouch_clicked_and.out
+
+# Must make sure motion.probe-input is FALSE whenever G38.4 is not being executed.
+# This is done by adding a custom ditial-out-00 pin and setting it TRUE just before
+# G38 and FALSE just after G38. Values are set directly in the .nc subroutine.
+# This custom pin is used as an input to an AND that then feeds motion.probe-input.
+net M64-and-in               motion.digital-out-00                 tool-probe.in0
+# I want to use debounce.0.0.out, but I can't use it twice. No clue how to deal with this.
+#net probe-sensor-and-in      debounce.0.0.out          		   tool-probe.in1
+#net probe-sensor-and-in      hm2_5i25.0.7i84.0.0.input-08-not     		   tool-probe.in1
+#net probe-sensor-and-in      ztouch_or.in0          		   tool-probe.in1
+#net probe-and-M64 	     tool-probe.out                        motion.probe-input

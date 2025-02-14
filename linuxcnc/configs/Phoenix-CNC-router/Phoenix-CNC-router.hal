@@ -9,18 +9,18 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JO
 loadrt hostmot2
 loadrt hm2_pci config=" num_encoders=0 num_pwmgens=0 num_3pwmgens=0 num_stepgens=3 sserial_port_0=00xxxxxx " 
 setp     hm2_5i25.0.watchdog.timeout_ns 10000000
-loadrt debounce cfg=1
-loadrt and2 names=tool-probe,xaxis_touch,yaxis_touch,zaxis_touch,homeall,ztouch_and
 
-addf debounce.0 servo-thread
-setp debounce.0.delay 100
+loadrt and2 names=tool-probe,xaxis_touch,yaxis_touch,zaxis_touch,homeall,ztouch_clicked_and
+loadrt or2 names=joy_or2_sel0,joy_or2_sel1,xaxis_sel,yaxis_sel,zaxis_sel,ztouch_or
+
+
 addf hm2_5i25.0.read servo-thread
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
 addf hm2_5i25.0.write         servo-thread
 # addf hm2_5i25.0.pet_watchdog  servo-thread
 addf tool-probe servo-thread
-addf ztouch_and servo-thread
+addf ztouch_clicked_and servo-thread
 
 
 # external output signals
@@ -189,25 +189,7 @@ net machine-is-on         halui.machine.is-on
 net jog-speed             halui.axis.jog-speed
 net MDI-mode              halui.mode.is-mdi
 
-#  ---probe signal---
 
-#net probe hm2_5i25.0.7i84.0.0.input-08-not => motion.probe-input
-net probe <= hm2_5i25.0.7i84.0.0.input-08-not
-net probe => debounce.0.0.in
-#net probe-debounced <= debounce.0.0.out
-#net probe-debounced  => motion.probe-input
-
-# Can't figure out another way to use this debounce pin twice.
-#net another-debounce1  debounce.0.0.out   or2.0.in0
-#net another-debounce2  FALSE              or2.0.in1
-# #net another-debounce   or2.0.out
-
-
-net M64-and-in               motion.digital-out-00                 tool-probe.in0
-net probe-sensor-and-in      debounce.0.0.out          		   tool-probe.in1
-#net probe-sensor-and-in      or2.0.in0          		   tool-probe.in1
-net probe-and-M64 	     tool-probe.out
-net probe-and-M64	     motion.probe-input
 
 
 #  ---motion control signals---
