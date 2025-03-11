@@ -1,0 +1,29 @@
+loadusr -Wn vfd hy_vfd -n vfd -d /dev/ttyUSB0 -p none -S4000 -r 19200 -s 1
+loadrt lincurve personality=4
+addf lincurve.0 servo-thread
+
+# Replace ttyUSB0 with the address of your adapter
+
+setp vfd.enable 1 # This enables the VFD in the driver
+net spindle-speed spindle.0.speed-out => vfd.speed-command
+net spindle-cw spindle.0.forward => vfd.spindle-forward
+net spindle-ccw spindle.0.reverse => vfd.spindle-reverse
+net spindle-on spindle.0.on => vfd.spindle-on
+net spindle-speed-fb => vfd.spindle-speed-fb
+net spindle-current <= vfd.OutA
+net spindle-comm-ok <= vfd.hycomm-ok
+
+net spindle-at-speed => vfd.spindle-at-speed
+net spindle-at-speed <= spindle.0.at-speed
+
+setp lincurve.0.x-val-00 0
+setp lincurve.0.y-val-00 0
+setp lincurve.0.x-val-01 500
+setp lincurve.0.y-val-01 2000
+setp lincurve.0.x-val-02 1000
+setp lincurve.0.y-val-02 4000
+setp lincurve.0.x-val-03 3000
+setp lincurve.0.y-val-03 6000
+
+net spindle-pre <= spindle.0.speed-out-abs lincurve.0.in
+net spindle-vel-cmd-rpm-abs <= lincurve.0.out
