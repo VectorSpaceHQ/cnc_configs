@@ -1,0 +1,24 @@
+O <z_touch_retract> sub
+    G4 P0.2 (wait for motion00 to clear)
+    M65 P00
+    G10 L20 P0 Z0	(set current Z = 0)
+    G91      		(switch to relative coordinates)
+    
+    M64 P00
+    G38.4 Z1 F8	(probe up using a fast feedrate)
+    M65 P00
+
+    G92 Z1.692 		(set Z = plate thickness)
+    G0 Z0.1
+    G1 Z-.15 F6	        (move down by 0.1mm)
+    G4 P0.1 (wait for debounce)
+    
+    M64 P00
+    G38.4 Z.22 F2        (2nd pass: probe up using a slow feedrate to get better accuracy)
+    M65 P00
+    
+    G92 Z1.692	   	(set Z = plate thickness)
+    G90		        (switch to absolute coordinates)
+    G0 Z2.0 F10	        (move to 10mm above work piece)
+
+O <z_touch_retract> endsub
