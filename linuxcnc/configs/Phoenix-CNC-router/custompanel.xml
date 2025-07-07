@@ -1,46 +1,29 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pyvcp>
-  <button>
-    <relief>RAISED</relief>
-    <bd>3</bd>
-    <halpin>"clear-motion-gui"</halpin>
-    <text>"Clear M64"</text>
-    <font>("Helvetica",16)</font>
-  </button>
 
-  
-  <button>
-    <relief>RAISED</relief>
-    <bd>3</bd>
-    <halpin>"ztouch"</halpin>
-    <text>"Touch Off Z"</text>
-    <font>("Helvetica",16)</font>
-  </button>
 
-  	<labelframe text="Probe State">
-	  <font>("Helvetica",12)</font>
+  <labelframe text="Tool Touch Probe">
+
+  <font>("Helvetica",12)</font>
         <label>
-	   <text>"tool probe touched"</text>
+	   <text>"Must be green"</text>
 	   <font>("Helvetica",12)</font>
 	</label>	  
 	<led>
-		  
 	<halpin>"probe-debounced-gui"</halpin>
 	<size>"10"</size>
 	<on_color>"green"</on_color>
 	<off_color>"red"</off_color>
 	</led>
-	 <label>
-	   <text>"M64 signal"</text>
-	   <font>("Helvetica",12)</font>
-	</label>
-  <led>
-       
-	<halpin>"probe-digital-out"</halpin>
-	<size>"10"</size>
-	<on_color>"green"</on_color>
-	<off_color>"red"</off_color>
-  </led>  
+
+	      <button>
+    <relief>RAISED</relief>
+    <bd>3</bd>
+    <halpin>"ztouch"</halpin>
+    <text>"Touch Off Z"</text>
+    <font>("Helvetica",14)</font>
+  </button>
+
 	</labelframe>
 	
 	<labelframe text="Huanyang VFD">
