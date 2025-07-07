@@ -5,17 +5,6 @@
   <labelframe text="Tool Touch Probe">
 
   <font>("Helvetica",12)</font>
-        <label>
-	   <text>"Must be green"</text>
-	   <font>("Helvetica",12)</font>
-	</label>	  
-	<led>
-	<halpin>"probe-debounced-gui"</halpin>
-	<size>"10"</size>
-	<on_color>"green"</on_color>
-	<off_color>"red"</off_color>
-	</led>
-
 	      <button>
     <relief>RAISED</relief>
     <bd>3</bd>

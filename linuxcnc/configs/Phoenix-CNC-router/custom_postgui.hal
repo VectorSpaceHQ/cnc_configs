@@ -15,7 +15,7 @@ net cycle-minutes pyvcp.time-minutes <= time.0.minutes
 net cycle-hours pyvcp.time-hours <= time.0.hours
 
 
-net probe <= pyvcp.probe-debounced-gui
+
 
 
 
