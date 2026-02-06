@@ -21,17 +21,18 @@ net cycle-hours pyvcp.time-hours <= time.0.hours
 # the machine-on signal so the pump can only be turned on when the
 # machine is enabled (machine-is-enabled / motion.motion-enabled).
 loadrt and2 names=vacuum_and
+loadrt toggle names=pendant_vacuum_toggle
 addf vacuum_and servo-thread
+addf pendant_vacuum_toggle servo-thread
 
-# UI toggle -> AND.in0
-net vacuum-pump-request pyvcp.vacuum-pump => vacuum_and.0.in0
+# UI toggle -> OR gate (will be combined with pendant input)
+# (connection is later via or2.1.in0 below)
 
-# machine enabled -> AND.in1
-# `machine-is-enabled` is provided by `axyz.hal` (net machine-is-enabled <= motion.motion-enabled)
-net vacuum-machine-enabled machine-is-enabled => vacuum_and.0.in1
+# machine power (F2) -> AND.in1
+net machine-is-enabled => vacuum_and.in1
 
 # AND.out -> hardware output
-net vacuum-pump vacuum_and.0.out => hm2_7i76e.0.7i76.0.0.output-07
+net vacuum-pump vacuum_and.out => hm2_7i76e.0.7i76.0.0.output-07
 
 # Alternate / legacy mappings (kept commented)
 #net vacuum-pump pyvcp.vacuum-pump whb.button.macro-10 => hm2_7i76e.0.7i76.0.0.output-07
@@ -39,15 +40,19 @@ net vacuum-pump vacuum_and.0.out => hm2_7i76e.0.7i76.0.0.output-07
 
 # Allow pendant macro-10 to request vacuum as well via an OR gate.
 # whb.button.macro-10 OR pyvcp.vacuum-pump -> vacuum_and.in0
-loadrt or2 names=vacuum_or
-addf vacuum_or servo-thread
+# (uses or2.1 - or2.0 is already used for Z probe touch in axyz.hal)
+addf or2.1 servo-thread
 
-# OR inputs: UI toggle and pendant macro-10
-net vacuum-or-ui pyvcp.vacuum-pump => vacuum_or.0.in0
-net vacuum-or-pdnt whb.button.macro-10 => vacuum_or.0.in1
+# Pendant button -> toggle component -> OR input
+# This converts the momentary button press into a toggled on/off state
+net pendant-vacuum-button whb.button.macro-10 => pendant_vacuum_toggle.in
+net pendant-vacuum-toggled pendant_vacuum_toggle.out => or2.1.in1
+
+# OR inputs: UI toggle and pendant toggle output
+net vacuum-or-ui pyvcp.vacuum-pump => or2.1.in0
 
 # OR.out -> AND.in0 (so OR result is gated by machine-is-enabled in vacuum_and)
-net vacuum-or-out vacuum_or.0.out => vacuum_and.0.in0
+net vacuum-or-out or2.1.out => vacuum_and.in0
 
 # Z Probe touch
 # Actual code is in ../subroutines/z_touch.ngc
