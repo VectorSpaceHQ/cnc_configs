@@ -1,0 +1,75 @@
+# Include your custom_postgui HAL commands here
+# This file will not be overwritten when you run PNCconf again
+
+# net spindle-at-speed => pyvcp.spindle-at-speed
+# net pyvcp-spindle-rpm spindle-vfd.spindle-speed-fb => pyvcp.spindle-speed
+# net pyvcp-modbus-ok spindle-vfd.hycomm-ok => pyvcp.hycomm-ok
+
+
+loadrt time
+addf time.0 servo-thread
+#net cycle-timer time.0.start <= halui.program.is-running
+# net cycle-timer-pause time.0.pause <= halui.program.is-paused
+#net cycle-seconds pyvcp.time-seconds <= time.0.seconds
+#net cycle-minutes pyvcp.time-minutes <= time.0.minutes
+#net cycle-hours pyvcp.time-hours <= time.0.hours
+
+
+# vacuum pump toggle button
+## Vacuum pump toggle button
+# Route the UI toggle (pyvcp.vacuum-pump) through an AND gate with
+# the machine-on signal so the pump can only be turned on when the
+# machine is enabled (machine-is-enabled / motion.motion-enabled).
+loadrt and2 names=vacuum_and
+loadrt toggle names=pendant_vacuum_toggle
+loadrt conv_u32_s32
+addf conv-u32-s32.0 servo-thread
+addf vacuum_and servo-thread
+addf pendant_vacuum_toggle servo-thread
+
+# UI toggle -> OR gate (will be combined with pendant input)
+# (connection is later via or2.1.in0 below)
+
+# machine power (F2) -> AND.in1
+net machine-is-enabled => vacuum_and.in1
+
+# AND.out -> hardware output
+net vacuum-pump vacuum_and.out => hm2_7i76e.0.7i76.0.0.output-07 qtdragon.vs-custom.vacuum-led time.0.start
+
+# Alternate / legacy mappings (kept commented)
+#net vacuum-pump pyvcp.vacuum-pump whb.button.macro-10 => hm2_7i76e.0.7i76.0.0.output-07
+#net vacuum-pump => whb.button.macro-10 hm2_7i76e.0.7i76.0.0.output-07
+
+# Allow pendant macro-10 to request vacuum as well via an OR gate.
+# whb.button.macro-10 OR pyvcp.vacuum-pump -> vacuum_and.in0
+# (uses or2.1 - or2.0 is already used for Z probe touch in axyz.hal)
+addf or2.1 servo-thread
+
+# Pendant button -> toggle component -> OR input
+# This converts the momentary button press into a toggled on/off state
+net pendant-vacuum-button whb.button.macro-10 => pendant_vacuum_toggle.in
+net pendant-vacuum-toggled pendant_vacuum_toggle.out => or2.1.in1
+
+# OR inputs: UI toggle and pendant toggle output
+net vacuum-or-ui qtdragon.vs-custom.vacuum-pump => or2.1.in0
+
+# OR.out -> AND.in0 (so OR result is gated by machine-is-enabled in vacuum_and)
+net vacuum-or-out or2.1.out => vacuum_and.in0 
+
+
+
+
+# 3. Send the time string to your QtLabel
+# The 'time' component outputs a formatted string on the .seconds-rt pin
+#net vacuum-time-string time.0.seconds => qtdragon.vs-custom.vacuum-timer-display
+#net vacuum-raw-seconds time.0.seconds => qtdragon.vs-custom.vacuum-timer-display
+#net vacuum-time-f time.0.seconds => qtdragon.vs-custom.vacuum-timer-display
+net time-seconds time.0.seconds => conv-u32-s32.0.in
+net time-seconds-s32 conv-u32-s32.0.out => qtdragon.vs-custom.vacuum-timer-display
+
+
+# Z Probe touch
+# Actual code is in ../subroutines/z_touch.ngc
+#net gui_ztouch <= pyvcp.ztouch  or2.0.in0
+net gui_and_pdnt_zprobe  or2.0.out
+net gui_and_pdnt_zprobe halui.mdi-command-08

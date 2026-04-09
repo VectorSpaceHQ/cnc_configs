@@ -1,0 +1,7 @@
+1. Comment out machine-is-on and MDI-mode in main .hal file
+2. Add HALFILE = xhc-whb04b-6.hal to .ini
+
+whb.halui.joint.x.is-homed does not exist
+
+
+https://forum.linuxcnc.org/10-advanced-configuration/32421-xhc-hb04-basic-setup-in-2-8
