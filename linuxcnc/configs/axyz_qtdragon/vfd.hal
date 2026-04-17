@@ -2,13 +2,10 @@
 # This file will not be overwritten when you run stepconf again
 loadrt lincurve count=1 personality=7
 addf lincurve.0 servo-thread
+loadrt scale names=spindle_amp_scale,spindle_volts_scale
+addf spindle_amp_scale servo-thread
+addf spindle_volts_scale servo-thread
 
-
-# loadrt scale names=spindle_fb_scale
-# addf spindle_fb_scale servo-thread
-
-# setp spindle_fb_scale.offset 0.103
-# setp spindle_fb_scale.gain 40.9
 
 # Set the Voltage points (X-axis)
 setp lincurve.0.x-val-00 0.0
@@ -39,3 +36,24 @@ net spindle-voltage-raw hm2_7i76e.0.7i76.0.0.analogin0 => lincurve.0.in
 net spindle-speed-fb-rps lincurve.0.out => spindle.0.speed-in
 
 
+# Calculation: (Max Amps / 15.0V) 
+# Example for a 17A spindle: 2* 17 / 15 = 2.27
+setp spindle_amp_scale.gain 15.33
+
+# Link physical pin to scale
+net spindle-amps-raw hm2_7i76e.0.7i76.0.0.analogin1 => spindle_amp_scale.in
+
+# Link scale to QtDragon's internal pin
+net spindle-amps-final spindle_amp_scale.out => qtdragon.spindle-amps
+
+
+
+# Calculation: (Max Spindle Volts / Max RPS)
+# Example: 230V / 333 RPS = 0.69
+setp spindle_volts_scale.gain 0.69
+
+# Connect the commanded speed to the voltage scale
+net spindle-vel-cmd-rps => spindle_volts_scale.in
+
+# Connect the scaled Voltage to QtDragon
+net spindle-voltage-fb spindle_volts_scale.out => qtdragon.spindle-volts
