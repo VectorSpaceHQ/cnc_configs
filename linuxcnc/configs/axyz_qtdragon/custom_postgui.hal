@@ -20,7 +20,6 @@ addf time.0 servo-thread
 # Route the UI toggle (pyvcp.vacuum-pump) through an AND gate with
 # the machine-on signal so the pump can only be turned on when the
 # machine is enabled (machine-is-enabled / motion.motion-enabled).
-loadrt and2 names=vacuum_and
 loadrt toggle names=pendant_vacuum_toggle
 loadrt conv_u32_s32
 addf conv-u32-s32.0 servo-thread
