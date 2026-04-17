@@ -21,8 +21,9 @@ addf time.0 servo-thread
 # the machine-on signal so the pump can only be turned on when the
 # machine is enabled (machine-is-enabled / motion.motion-enabled).
 loadrt toggle names=pendant_vacuum_toggle
-loadrt conv_u32_s32
+loadrt conv_u32_s32 count=2
 addf conv-u32-s32.0 servo-thread
+addf conv-u32-s32.1 servo-thread
 addf vacuum_and servo-thread
 addf pendant_vacuum_toggle servo-thread
 
@@ -60,11 +61,10 @@ net vacuum-or-out or2.1.out => vacuum_and.in0
 
 # 3. Send the time string to your QtLabel
 # The 'time' component outputs a formatted string on the .seconds-rt pin
-#net vacuum-time-string time.0.seconds => qtdragon.vs-custom.vacuum-timer-display
-#net vacuum-raw-seconds time.0.seconds => qtdragon.vs-custom.vacuum-timer-display
-#net vacuum-time-f time.0.seconds => qtdragon.vs-custom.vacuum-timer-display
-net time-seconds time.0.seconds => conv-u32-s32.0.in
-net time-seconds-s32 conv-u32-s32.0.out => qtdragon.vs-custom.vacuum-timer-display
+net time-minutes time.0.minutes => conv-u32-s32.0.in
+net time-minutes-s32 conv-u32-s32.0.out => qtdragon.vs-custom.vacuum-timer-minutes
+net time-seconds time.0.seconds => conv-u32-s32.1.in
+net time-seconds-s32 conv-u32-s32.1.out => qtdragon.vs-custom.vacuum-timer-seconds
 
 
 # Z Probe touch

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>784</width>
-    <height>466</height>
+    <width>800</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>70</x>
      <y>70</y>
      <width>649</width>
-     <height>174</height>
+     <height>182</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -52,7 +52,7 @@
         <property name="maximumSize">
          <size>
           <width>200</width>
-          <height>16777215</height>
+          <height>50</height>
          </size>
         </property>
         <property name="text">
@@ -73,6 +73,12 @@ on Cycle Start</string>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QLabel" name="label_4">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>50</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <family>Noto Sans</family>
@@ -89,6 +95,12 @@ on Cycle Start</string>
       </item>
       <item>
        <widget class="PushButton" name="startVacuum">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>50</height>
+         </size>
+        </property>
         <property name="text">
          <string>Toggle Vacuum Pump</string>
         </property>
@@ -124,44 +136,94 @@ on Cycle Start</string>
       </item>
       <item>
        <widget class="QLabel" name="label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>50</height>
+         </size>
+        </property>
         <property name="text">
          <string>Vacuum Pump ON time:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="HALLabel" name="hallabeld">
-        <property name="font">
-         <font>
-          <family>Noto Sans</family>
-          <pointsize>14</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>test</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::RichText</enum>
-        </property>
-        <property name="pin_name" stdset="0">
-         <string>vacuum-timer-display</string>
-        </property>
-        <property name="s32_pin_type" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="float_pin_type" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="textTemplate" stdset="0">
-         <string>Time On: %.2f sec</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLCDNumber" name="lcdNumber"/>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="HALLabel" name="hallabeld_2">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Noto Sans</family>
+            <pointsize>16</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>minutes</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
+          <property name="pin_name" stdset="0">
+           <string>vacuum-timer-minutes</string>
+          </property>
+          <property name="s32_pin_type" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="float_pin_type" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="textTemplate" stdset="0">
+           <string>Time On: %.0f min</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="HALLabel" name="hallabeld">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Noto Sans</family>
+            <pointsize>16</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>seconds</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
+          <property name="pin_name" stdset="0">
+           <string>vacuum-timer-seconds</string>
+          </property>
+          <property name="s32_pin_type" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="float_pin_type" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="textTemplate" stdset="0">
+           <string>%.0f sec</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
