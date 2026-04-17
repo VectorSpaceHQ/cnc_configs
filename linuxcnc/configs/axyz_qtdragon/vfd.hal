@@ -1,16 +1,41 @@
 # Include your customized HAL commands here
 # This file will not be overwritten when you run stepconf again
+loadrt lincurve count=1 personality=7
+addf lincurve.0 servo-thread
 
-# Load the Huanyang VFD user component
-# loadusr -Wn spindle-vfd hy_vfd -n spindle-vfd -t 1 -d /dev/ttyUSB0 -p none -r 19200 -s 1 −−motor−speed 24000
 
-setp spindle-vfd.enable 1
-net spindle-fwd spindle.0.forward => spindle-vfd.spindle-forward
+# loadrt scale names=spindle_fb_scale
+# addf spindle_fb_scale servo-thread
 
-net spindle-reverse spindle.0.reverse => spindle-vfd.spindle-reverse
-net spindle-speed-cmd  spindle.0.speed-out-abs => spindle-vfd.speed-command
-net spindle-on spindle.0.on => spindle-vfd.spindle-on
+# setp spindle_fb_scale.offset 0.103
+# setp spindle_fb_scale.gain 40.9
 
-net spindle-at-speed spindle.0.at-speed => spindle-vfd.spindle-at-speed 
+# Set the Voltage points (X-axis)
+setp lincurve.0.x-val-00 0.0
+setp lincurve.0.y-val-00 0.0
+
+setp lincurve.0.x-val-01 0.1423
+setp lincurve.0.y-val-01 10.8
+
+setp lincurve.0.x-val-02 0.7118
+setp lincurve.0.y-val-02 30.7
+
+setp lincurve.0.x-val-03 2.562
+setp lincurve.0.y-val-03 87.0
+
+setp lincurve.0.x-val-04 5.409
+setp lincurve.0.y-val-04 175.0
+
+setp lincurve.0.x-val-05 7.829
+setp lincurve.0.y-val-05 252.0
+
+setp lincurve.0.x-val-06 10.534
+setp lincurve.0.y-val-06 335.0
+
+# Connect the Mesa pin to the curve input
+net spindle-voltage-raw hm2_7i76e.0.7i76.0.0.analogin0 => lincurve.0.in
+
+# Connect the curve output to the display (and filter if you used one)
+net spindle-speed-fb-rps lincurve.0.out => spindle.0.speed-in
 
 
