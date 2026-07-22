@@ -10408,11 +10408,11 @@ HOME</string>
                     </size>
                    </property>
                    <property name="toolTip">
-                    <string>Toggle laser crosshairs</string>
+                    <string>Go to Zero position</string>
                    </property>
                    <property name="text">
-                    <string>LASER
-OFF</string>
+                    <string>GO TO 
+                    ZERO</string>
                    </property>
                    <property name="checkable">
                     <bool>true</bool>
@@ -10447,8 +10447,8 @@ OFF</string>
 ON</string>
                    </property>
                    <property name="false_state_string" stdset="0">
-                    <string>LASER
-OFF</string>
+                    <string>GO TO 
+ZERO</string>
                    </property>
                    <property name="true_python_cmd_string" stdset="0">
                     <string>print&quot;Laser crosshair turned on&quot;</string>
@@ -10482,8 +10482,7 @@ OFF</string>
                     <string>Set laser crosshair reference</string>
                    </property>
                    <property name="text">
-                    <string>REF
-LASER</string>
+                    <string>UNUSED</string>
                    </property>
                   </widget>
                  </item>
@@ -17581,7 +17580,7 @@ ANGULAR</string>
     </hint>
    </hints>
   </connection>
-  <connection>
+    <connection>
    <sender>btn_tool_sensor</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
