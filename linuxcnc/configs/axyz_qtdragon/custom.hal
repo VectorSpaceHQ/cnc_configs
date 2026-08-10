@@ -1,0 +1,26 @@
+# Include your custom HAL commands here
+# This file will not be overwritten when you run PNCconf again
+
+
+net estop-ext <= hm2_7i76e.0.7i76.0.0.input-08
+net estop-ext => iocontrol.0.emc-enable-in
+
+
+# Wait for SPINDLE AT SPEED
+# load a near component and attach it to a thread
+loadrt near
+addf near.0 servo-thread
+
+# connect one input to the commanded spindle speed
+net spindle-cmd => near.0.in1
+
+# connect one input to the encoder-measured spindle speed
+net spindle-velocity => near.0.in2
+
+# connect the output to the spindle-at-speed input
+net spindle-at-speed spindle.0.at-speed <= near.0.out
+
+# set the spindle speed inputs to agree if within 1%
+setp near.0.scale 1.01
+
+
