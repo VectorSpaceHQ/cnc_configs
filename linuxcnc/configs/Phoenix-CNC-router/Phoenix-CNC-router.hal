@@ -7,13 +7,15 @@ loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS 
 #loadrt probe_parport
 loadrt hostmot2
-loadrt hm2_pci config=" num_encoders=0 num_pwmgens=0 num_3pwmgens=0 num_stepgens=3 sserial_port_0=00xxxxxx " 
+loadrt hm2_pci config=" num_encoders=0 num_pwmgens=0 num_3pwmgens=0 num_stepgens=3 sserial_port_0=00xxxxxx "
 setp     hm2_5i25.0.watchdog.timeout_ns 10000000
 
 loadrt and2 names=tool-probe,xaxis_touch,yaxis_touch,zaxis_touch,homeall,ztouch_clicked_and
-loadrt or2 names=joy_or2_sel0,joy_or2_sel1,xaxis_sel,yaxis_sel,zaxis_sel,ztouch_or
+#loadrt or2 names=joy_or2_sel0,joy_or2_sel1,xaxis_sel,yaxis_sel,zaxis_sel,ztouch_or
+loadrt or2 count=2
 
 
+addf or2.0           servo-thread
 addf hm2_5i25.0.read servo-thread
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
@@ -55,16 +57,16 @@ setp   hm2_5i25.0.stepgen.01.stepspace       [JOINT_0]STEPSPACE
 setp   hm2_5i25.0.stepgen.01.position-scale  [JOINT_0]STEP_SCALE
 setp   hm2_5i25.0.stepgen.01.step_type        0
 setp   hm2_5i25.0.stepgen.01.control-type     0
-setp   hm2_5i25.0.stepgen.01.maxaccel         62.5
-setp   hm2_5i25.0.stepgen.01.maxvel           4.2
-# Adam modified on 4/10/21
-# setp   hm2_5i25.0.stepgen.01.maxaccel        [JOINT_0]STEPGEN_MAXACCEL
-# setp   hm2_5i25.0.stepgen.01.maxvel          [JOINT_0]STEPGEN_MAXVEL
+setp   hm2_5i25.0.stepgen.01.maxaccel        [JOINT_0]STEPGEN_MAXACCEL
+setp   hm2_5i25.0.stepgen.01.maxvel          [JOINT_0]STEPGEN_MAXVEL
 
 net x-pos-fb     joint.0.motor-pos-fb   <=  hm2_5i25.0.stepgen.01.position-fb
 net x-pos-cmd    joint.0.motor-pos-cmd  =>  hm2_5i25.0.stepgen.01.position-cmd
 # net x-enable     joint.0.amp-enable-out =>  hm2_5i25.0.stepgen.01.enable
 net x-enable     joint.0.amp-enable-out =>  hm2_5i25.0.stepgen.01.enable
+#net x-enable hm2_5i25.0.7i84.0.0.output-07
+#net machine-is-on  motion.motion-enabled => hm2_5i25.0.7i84.0.0.output-07
+#net machine-is-on => hm2_5i25.0.7i84.0.0.output-07
 
 # ---setup home / limit switch signals---
 net home-x     =>  joint.0.home-sw-in
@@ -85,11 +87,8 @@ setp   hm2_5i25.0.stepgen.02.stepspace       [JOINT_1]STEPSPACE
 setp   hm2_5i25.0.stepgen.02.position-scale  [JOINT_1]STEP_SCALE
 setp   hm2_5i25.0.stepgen.02.step_type        0
 setp   hm2_5i25.0.stepgen.02.control-type     0
-setp   hm2_5i25.0.stepgen.02.maxaccel         63.8
-setp   hm2_5i25.0.stepgen.02.maxvel           4.2
-# Adam modified on 4/10/21
-#setp   hm2_5i25.0.stepgen.02.maxaccel         50.0
-#setp   hm2_5i25.0.stepgen.02.maxvel           3.5
+setp   hm2_5i25.0.stepgen.02.maxaccel         [JOINT_1]STEPGEN_MAXACCEL
+setp   hm2_5i25.0.stepgen.02.maxvel           [JOINT_1]STEPGEN_MAXVEL
 
 net y-pos-fb     joint.1.motor-pos-fb   <=  hm2_5i25.0.stepgen.02.position-fb
 net y-pos-cmd    joint.1.motor-pos-cmd  =>  hm2_5i25.0.stepgen.02.position-cmd
@@ -114,11 +113,11 @@ setp   hm2_5i25.0.stepgen.00.stepspace       [JOINT_2]STEPSPACE
 setp   hm2_5i25.0.stepgen.00.position-scale  [JOINT_2]STEP_SCALE
 setp   hm2_5i25.0.stepgen.00.step_type        0
 setp   hm2_5i25.0.stepgen.00.control-type     0
-# setp   hm2_5i25.0.stepgen.00.maxaccel         62.5
-# setp   hm2_5i25.0.stepgen.00.maxvel           1.2
+setp   hm2_5i25.0.stepgen.00.maxaccel         [JOINT_2]STEPGEN_MAXACCEL
+setp   hm2_5i25.0.stepgen.00.maxvel           [JOINT_2]STEPGEN_MAXVEL
 # Adam modified on 4/10/21
-setp   hm2_5i25.0.stepgen.00.maxaccel         50.0
-setp   hm2_5i25.0.stepgen.00.maxvel           1.0
+#setp   hm2_5i25.0.stepgen.00.maxaccel         50.0
+#setp   hm2_5i25.0.stepgen.00.maxvel           1.0
 
 net z-pos-fb     joint.2.motor-pos-fb   <=  hm2_5i25.0.stepgen.00.position-fb
 net z-pos-cmd    joint.2.motor-pos-cmd  =>  hm2_5i25.0.stepgen.00.position-cmd
@@ -165,17 +164,17 @@ sets spindle-at-speed true
 
 #  ---HALUI signals---
 
-net joint-select-a        halui.axis.x.select
+#net joint-select-a        halui.axis.x.select
 net x-is-homed            halui.joint.0.is-homed
 net jog-x-pos             halui.axis.x.plus
 net jog-x-neg             halui.axis.x.minus
 # net jog-x-analog          halui.axis.x.analog
-net joint-select-b        halui.axis.y.select
+#net joint-select-b        halui.axis.y.select
 net y-is-homed            halui.joint.1.is-homed
 net jog-y-pos             halui.axis.y.plus
 net jog-y-neg             halui.axis.y.minus
 # net jog-y-analog          halui.axis.y.analog
-net joint-select-c        halui.axis.z.select
+#net joint-select-c        halui.axis.z.select
 net z-is-homed            halui.joint.2.is-homed
 net jog-z-pos             halui.axis.z.plus
 net jog-z-neg             halui.axis.z.minus
@@ -185,9 +184,9 @@ net jog-selected-neg      halui.axis.selected.minus
 net spindle-manual-cw     halui.spindle.0.forward
 net spindle-manual-ccw    halui.spindle.0.reverse
 net spindle-manual-stop   halui.spindle.0.stop
-net machine-is-on         halui.machine.is-on
+#net machine-is-on         halui.machine.is-on
 net jog-speed             halui.axis.jog-speed
-net MDI-mode              halui.mode.is-mdi
+#net MDI-mode              halui.mode.is-mdi
 
 
 
@@ -198,7 +197,7 @@ net in-position               <=  motion.in-position
 net machine-is-enabled        <=  motion.motion-enabled
 
 #  ---digital in / out signals---
-
+net machine-is-enabled => hm2_5i25.0.7i84.0.0.output-07
 
 #  ---manual tool change signals---
 

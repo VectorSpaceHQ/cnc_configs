@@ -8,7 +8,7 @@ net pyvcp-modbus-ok spindle-vfd.hycomm-ok => pyvcp.hycomm-ok
 
 loadrt time
 addf time.0 servo-thread
-net cycle-timer time.0.start <= halui.program.is-running
+#net cycle-timer time.0.start <= halui.program.is-running
 # net cycle-timer-pause time.0.pause <= halui.program.is-paused
 net cycle-seconds pyvcp.time-seconds <= time.0.seconds
 net cycle-minutes pyvcp.time-minutes <= time.0.minutes
