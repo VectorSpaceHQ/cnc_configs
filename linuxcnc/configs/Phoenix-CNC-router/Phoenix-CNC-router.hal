@@ -196,6 +196,11 @@ net jog-speed             halui.axis.jog-speed
 net in-position               <=  motion.in-position
 net machine-is-enabled        <=  motion.motion-enabled
 
+#  ---estop signals---
+net estop-out     <=  iocontrol.0.user-enable-out
+net estop-ext     =>  iocontrol.0.emc-enable-in
+net estop-ext     <=  hm2_5i25.0.7i84.0.0.input-15
+
 #  ---digital in / out signals---
 net machine-is-enabled => hm2_5i25.0.7i84.0.0.output-07
 
@@ -206,4 +211,5 @@ net tool-change-request     iocontrol.0.tool-change       =>  hal_manualtoolchan
 net tool-change-confirmed   iocontrol.0.tool-changed      <=  hal_manualtoolchange.changed
 net tool-number             iocontrol.0.tool-prep-number  =>  hal_manualtoolchange.number
 net tool-prepare-loopback   iocontrol.0.tool-prepare      =>  iocontrol.0.tool-prepared
+
 
