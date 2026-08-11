@@ -10,19 +10,22 @@ loadrt hostmot2
 loadrt hm2_pci config=" num_encoders=0 num_pwmgens=0 num_3pwmgens=0 num_stepgens=3 sserial_port_0=00xxxxxx "
 setp     hm2_5i25.0.watchdog.timeout_ns 10000000
 
+
 loadrt and2 names=tool-probe,xaxis_touch,yaxis_touch,zaxis_touch,homeall,ztouch_clicked_and
 #loadrt or2 names=joy_or2_sel0,joy_or2_sel1,xaxis_sel,yaxis_sel,zaxis_sel,ztouch_or
 loadrt or2 count=2
-
+loadrt debounce cfg=1
 
 addf or2.0           servo-thread
+addf debounce.0               servo-thread
 addf hm2_5i25.0.read servo-thread
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
 addf hm2_5i25.0.write         servo-thread
-# addf hm2_5i25.0.pet_watchdog  servo-thread
 addf tool-probe servo-thread
 addf ztouch_clicked_and servo-thread
+
+setp debounce.0.delay 10
 
 
 # external output signals
@@ -202,7 +205,10 @@ net estop-ext     =>  iocontrol.0.emc-enable-in
 net estop-ext     <=  hm2_5i25.0.7i84.0.0.input-15
 
 #  ---digital in / out signals---
+# x-drive enable
 net machine-is-enabled => hm2_5i25.0.7i84.0.0.output-07
+# z-probe enable
+net machine-is-enabled => hm2_5i25.0.7i84.0.0.output-06
 
 #  ---manual tool change signals---
 
@@ -213,3 +219,12 @@ net tool-number             iocontrol.0.tool-prep-number  =>  hal_manualtoolchan
 net tool-prepare-loopback   iocontrol.0.tool-prepare      =>  iocontrol.0.tool-prepared
 
 
+# Tool Probe
+#  ---probe signal---
+# When I press probe-z on the pendant (whb.button.probe-z), that get's stored in the pdnt.button.probe-z signal and output to the or2.0.in1 pin so that it can later be ORed with the gui button. The signal named "probe" has been tied to the input pin hm2_5i25.0.7i84.0.0.input-08. That probe signal is sent out to a debounce variable named debounce.0.0.in. The output of the debounce routing is named debounce.0.0.out, which is stored in a new signal named probe-debounced. The probe-debounced signal is then sent to the magic motion.probe-input pin, which linuxCNC knows to watch for behind the scenes.
+# the xml "Touch off Z" button does not work by connecting to hal pin halui.mdi-command-08, which one would expect, given that this is how the pendant works. Instead, <halpin> is giving a pin name to the button, which is pyvcp.ztouch.
+# halui.mdi-command-08 is a magic pin name for the 8th MDI_COMMAND listed in axyz.ini, which is to call the z_touch.ngc subroutine. 
+net probe <= hm2_5i25.0.7i84.0.0.input-08-not
+net probe => debounce.0.0.in
+net probe-debounced <= debounce.0.0.out
+net probe-debounced  => motion.probe-input
