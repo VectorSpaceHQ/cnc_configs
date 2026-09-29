@@ -382,6 +382,9 @@ class HandlerClass:
         self.w.gcode_editor.hide()
         self.w.filemanager.table.setShowGrid(False)
         self.w.filemanager_usb.table.setShowGrid(False)
+        # require double click to enter a directory
+        self.w.filemanager.setDoubleClickSelection(True)
+        self.w.filemanager_usb.setDoubleClickSelection(True)
         self.configure_filemanager_path_entry(self.w.filemanager)
         self.configure_filemanager_path_entry(self.w.filemanager_usb)
         self.configure_jump_button_left_click(self.w.filemanager)
