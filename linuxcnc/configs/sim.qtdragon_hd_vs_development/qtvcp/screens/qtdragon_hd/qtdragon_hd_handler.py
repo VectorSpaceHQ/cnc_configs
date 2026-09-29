@@ -63,6 +63,38 @@ CRITICAL = 2
 
 VERSION ='1.5'
 
+class PathTabCompleter:
+    """Shell style Tab completion for a path QLineEdit.
+    Tab key presses are routed here from processed_key_event__."""
+    def __init__(self, line_edit, status_callback=None, completed_callback=None):
+        self.line_edit = line_edit
+        self.status_callback = status_callback
+        self.completed_callback = completed_callback
+        line_edit.tab_completer = self
+
+    def complete(self):
+        text = self.line_edit.text()
+        head, prefix = os.path.split(text)
+        search_dir = os.path.expandvars(os.path.expanduser(head)) if head else os.getcwd()
+        try:
+            entries = os.listdir(search_dir)
+        except OSError:
+            return
+        show_hidden = prefix.startswith('.')
+        matches = sorted(e for e in entries
+                         if e.startswith(prefix) and (show_hidden or not e.startswith('.')))
+        if not matches:
+            return
+        common = os.path.commonprefix(matches)
+        completed = os.path.join(head, common)
+        if len(matches) == 1 and os.path.isdir(os.path.join(search_dir, common)):
+            completed += os.sep
+        self.line_edit.setText(completed)
+        if self.completed_callback is not None:
+            self.completed_callback(completed)
+        if len(matches) > 1 and common == prefix and self.status_callback is not None:
+            self.status_callback('  '.join(matches))
+
 class HandlerClass:
     def __init__(self, halcomp, widgets, paths):
         self.h = halcomp
@@ -521,6 +553,15 @@ class HandlerClass:
             return
     
     def processed_key_event__(self,receiver,event,is_pressed,key,code,shift,cntrl):
+        # Tab completion in file manager path entries
+        if code == QtCore.Qt.Key_Tab:
+            completer = getattr(receiver, 'tab_completer', None)
+            if completer is not None:
+                if is_pressed:
+                    completer.complete()
+                event.accept()
+                return True
+
         # when typing in MDI, we don't want keybinding to call functions
         # so we catch and process the events directly.
         # We do want ESC, F1 and F2 to call keybinding functions though
@@ -1561,6 +1602,29 @@ class HandlerClass:
         path_line.returnPressed.connect(
             lambda fm=file_manager: self.navigate_filemanager_to_typed_path(fm)
         )
+        # show the typed directory as soon as it is a valid path
+        path_line.textEdited.connect(
+            lambda text, fm=file_manager: self.preview_filemanager_typed_path(fm, text)
+        )
+        PathTabCompleter(path_line, self.add_status,
+            lambda text, fm=file_manager: self.preview_filemanager_typed_path(fm, text))
+
+    def preview_filemanager_typed_path(self, file_manager, text):
+        raw_path = text.strip()
+        if not raw_path:
+            return
+        typed_path = os.path.normpath(os.path.expandvars(os.path.expanduser(raw_path)))
+        if not os.path.isdir(typed_path):
+            return
+        if typed_path == os.path.normpath(file_manager.model.rootPath()):
+            return
+        # changing the view rewrites the entry with the normalized path,
+        # so restore what the user typed and the cursor position
+        path_line = file_manager.textLine
+        cursor = path_line.cursorPosition()
+        file_manager.updateDirectoryView(typed_path, quiet=True)
+        path_line.setText(text)
+        path_line.setCursorPosition(cursor)
 
     def navigate_filemanager_to_typed_path(self, file_manager):
         path_line = getattr(file_manager, 'textLine', None)
