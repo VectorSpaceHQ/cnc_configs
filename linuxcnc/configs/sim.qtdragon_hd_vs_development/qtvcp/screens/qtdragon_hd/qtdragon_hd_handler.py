@@ -92,6 +92,11 @@ class HandlerClass:
         self.time_tenths = 0
         self.timer_on = False
         self.home_all = False
+        # blink HOME ALL button after machine on until it is clicked
+        self.home_blink_state = False
+        self.home_blink_timer = QtCore.QTimer()
+        self.home_blink_timer.setInterval(500)
+        self.home_blink_timer.timeout.connect(self.toggle_home_all_blink)
         self.min_spindle_rpm = INFO.MIN_SPINDLE_SPEED
         self.max_spindle_rpm = INFO.MAX_SPINDLE_SPEED
         self.max_spindle_power = INFO.get_error_safe_setting('DISPLAY', 'MAX_SPINDLE_POWER',"1500")
@@ -177,6 +182,7 @@ class HandlerClass:
         self.w.page_buttonGroup.buttonClicked.connect(self.main_tab_changed)
         self.w.filemanager_usb.showMediaDir(quiet = True)
         self.configure_gcodegraphics_middle_pan()
+        QtCore.QTimer.singleShot(250, self.force_startup_tool_display)
         # Re-emit DRO mode action at startup so displayed values match selected mode.
         # Without this delayed pass, G54 can appear selected while DRO values still show ABS.
         QtCore.QTimer.singleShot(200, self.apply_startup_dro_mode)
@@ -293,7 +299,8 @@ class HandlerClass:
             self.add_status("CRITICAL - no preference file found, enable preferences in screenoptions widget")
             return
         self.last_loaded_program = self.w.PREFS_.getpref('last_loaded_file', None, str,'BOOK_KEEPING')
-        self.reload_tool = self.w.PREFS_.getpref('Tool to load', 0, int,'CUSTOM_FORM_ENTRIES')
+        # Hard-code startup tool selection for this screen.
+        self.reload_tool = 1
         self.w.lineEdit_laser_x.setText(str(self.w.PREFS_.getpref('Laser X', 100, float, 'CUSTOM_FORM_ENTRIES')))
         self.w.lineEdit_laser_y.setText(str(self.w.PREFS_.getpref('Laser Y', -20, float, 'CUSTOM_FORM_ENTRIES')))
         self.w.lineEdit_sensor_x.setText(str(self.w.PREFS_.getpref('Sensor X', 10, float, 'CUSTOM_FORM_ENTRIES')))
@@ -329,7 +336,7 @@ class HandlerClass:
         if self.last_loaded_program is not None:
             self.w.PREFS_.putpref('last_loaded_directory', os.path.dirname(self.last_loaded_program), str, 'BOOK_KEEPING')
             self.w.PREFS_.putpref('last_loaded_file', self.last_loaded_program, str, 'BOOK_KEEPING')
-        self.w.PREFS_.putpref('Tool to load', STATUS.get_current_tool(), int, 'CUSTOM_FORM_ENTRIES')
+        self.w.PREFS_.putpref('Tool to load', 1, int, 'CUSTOM_FORM_ENTRIES')
         self.w.PREFS_.putpref('Laser X', self.w.lineEdit_laser_x.text().encode('utf-8'), float, 'CUSTOM_FORM_ENTRIES')
         self.w.PREFS_.putpref('Laser Y', self.w.lineEdit_laser_y.text().encode('utf-8'), float, 'CUSTOM_FORM_ENTRIES')
         self.w.PREFS_.putpref('Sensor X', self.w.lineEdit_sensor_x.text().encode('utf-8'), float, 'CUSTOM_FORM_ENTRIES')
@@ -382,6 +389,7 @@ class HandlerClass:
         self.w.tooloffsetview.setShowGrid(False)
         self.w.offset_table.setShowGrid(False)
         self.w.divider_line.hide()
+        self.w.lbl_tool_in_spindle.setText("1")
 
         #set up gcode list
         self.gcodes.setup_list()
@@ -736,10 +744,9 @@ class HandlerClass:
     def all_homed(self, obj):
         self.home_all = True
         self.w.btn_home_all.setText("ALL HOMED")
+        self.stop_home_all_blink()
         if self.first_turnon is True:
             self.first_turnon = False
-            if self.w.chk_reload_tool.isChecked() and self.reload_tool > 0:
-                ACTION.CALL_MDI("M61 Q{} G43".format(self.reload_tool))
             if self.last_loaded_program is not None and self.w.chk_reload_program.isChecked():
                 if os.path.isfile(self.last_loaded_program):
                     self.w.cmb_gcode_history.addItem(self.last_loaded_program)
@@ -957,6 +964,7 @@ class HandlerClass:
 
     # DRO frame
     def btn_home_all_clicked(self, obj):
+        self.stop_home_all_blink()
         if self.home_all is False:
             ACTION.SET_MACHINE_HOMING(-1)
         else:
@@ -1053,8 +1061,13 @@ class HandlerClass:
         if len(checked) > 1:
             self.add_status("Select only 1 tool to load", CRITICAL)
         elif checked:
-            self.add_status("Loaded tool {}".format(checked[0]))
-            ACTION.CALL_MDI("M61 Q{} G43".format(checked[0]))
+            selected_tool = int(checked[0])
+            load_tool = self._coerce_tool_number(selected_tool)
+            if selected_tool == 0:
+                self.add_status("Tool 0 remapped to tool 1")
+            else:
+                self.add_status("Loaded tool {}".format(load_tool))
+            ACTION.CALL_MDI("M61 Q{} G43".format(load_tool))
         else:
             self.add_status("No tool selected", WARNING)
 
@@ -1340,6 +1353,13 @@ class HandlerClass:
         else:
             ACTION.JOG(joint, 0, 0, 0)
 
+    def _coerce_tool_number(self, tool):
+        try:
+            tool = int(tool)
+        except (TypeError, ValueError):
+            return 1
+        return 1 if tool == 0 else tool
+
     def add_status(self, message, alertLevel = DEFAULT):
         if alertLevel==DEFAULT:
             self.set_style_default()
@@ -1361,12 +1381,42 @@ class HandlerClass:
     def enable_onoff(self, state):
         if state:
             self.add_status("Machine ON")
+            QtCore.QTimer.singleShot(100, self.force_startup_tool_display)
+            if not self.home_all:
+                self.start_home_all_blink()
         else:
             self.add_status("Machine OFF")
+            self.stop_home_all_blink()
         self.w.btn_pause_spindle.setChecked(False)
         self.h['eoffset-spindle-count'] = 0
         for widget in self.onoff_list:
             self.w[widget].setEnabled(state)
+
+    def start_home_all_blink(self):
+        self.home_blink_state = False
+        self.toggle_home_all_blink()
+        self.home_blink_timer.start()
+
+    def stop_home_all_blink(self):
+        self.home_blink_timer.stop()
+        self.home_blink_state = False
+        self.w.btn_home_all.setStyleSheet('')
+
+    def toggle_home_all_blink(self):
+        self.home_blink_state = not self.home_blink_state
+        if self.home_blink_state:
+            self.w.btn_home_all.setStyleSheet('background-color: rgb(255, 170, 0); color: black;')
+        else:
+            self.w.btn_home_all.setStyleSheet('')
+
+    def force_startup_tool_display(self):
+        try:
+            current_tool = int(STATUS.get_current_tool())
+        except (TypeError, ValueError):
+            current_tool = 0
+        # Keep UI startup state pinned to tool 1 whenever controller reports T0.
+        if current_tool == 0:
+            self.w.lbl_tool_in_spindle.setText("1")
 
     def set_start_line(self, line):
         if self.w.chk_run_from_line.isChecked():
@@ -1390,6 +1440,7 @@ class HandlerClass:
             self.add_status("Unable to copy file. %s" %e, WARNING)
 
     def periodic_update(self):
+        self.force_startup_tool_display()
         # if waiting and up to speed, lower spindle
         if self._spindle_wait:
             if bool(self.h.hal.get_value('spindle.0.at-speed')):
