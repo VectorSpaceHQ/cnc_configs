@@ -16,17 +16,23 @@ loadrt and2 names=tool-probe,xaxis_touch,yaxis_touch,zaxis_touch,homeall,ztouch_
 loadrt or2 count=2
 loadrt debounce cfg=1
 
+# 1. Read hardware inputs into HAL first
+addf hm2_5i25.0.read servo-thread
+
+# 2. Process your logic components and debounce
 addf or2.0           servo-thread
 addf debounce.0               servo-thread
-addf hm2_5i25.0.read servo-thread
-addf motion-command-handler servo-thread
-addf motion-controller servo-thread
-addf hm2_5i25.0.write         servo-thread
 addf tool-probe servo-thread
 addf ztouch_clicked_and servo-thread
 
-setp debounce.0.delay 10
+# 3. Pass data to motion controller
+addf motion-command-handler servo-thread
+addf motion-controller servo-thread
 
+# 4. Write data back out to the hardware
+addf hm2_5i25.0.write         servo-thread
+
+setp debounce.0.delay 10
 
 # external output signals
 setp hm2_5i25.0.gpio.002.is_output TRUE
@@ -223,7 +229,7 @@ net tool-prepare-loopback   iocontrol.0.tool-prepare      =>  iocontrol.0.tool-p
 #  ---probe signal---
 # When I press probe-z on the pendant (whb.button.probe-z), that get's stored in the pdnt.button.probe-z signal and output to the or2.0.in1 pin so that it can later be ORed with the gui button. The signal named "probe" has been tied to the input pin hm2_5i25.0.7i84.0.0.input-08. That probe signal is sent out to a debounce variable named debounce.0.0.in. The output of the debounce routing is named debounce.0.0.out, which is stored in a new signal named probe-debounced. The probe-debounced signal is then sent to the magic motion.probe-input pin, which linuxCNC knows to watch for behind the scenes.
 # the xml "Touch off Z" button does not work by connecting to hal pin halui.mdi-command-08, which one would expect, given that this is how the pendant works. Instead, <halpin> is giving a pin name to the button, which is pyvcp.ztouch.
-# halui.mdi-command-08 is a magic pin name for the 8th MDI_COMMAND listed in axyz.ini, which is to call the z_touch.ngc subroutine. 
+# halui.mdi-command-08 is a magic pin name for the 8th MDI_COMMAND listed in axyz.ini, which is to call the z_touch.ngc subroutine.
 net probe <= hm2_5i25.0.7i84.0.0.input-08-not
 net probe => debounce.0.0.in
 net probe-debounced <= debounce.0.0.out
