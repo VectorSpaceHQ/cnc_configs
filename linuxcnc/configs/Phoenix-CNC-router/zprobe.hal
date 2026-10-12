@@ -13,5 +13,5 @@ net probe-debounced  => motion.probe-input
 # Z Probe
 # Actual code is in ../subroutines/z_touch.ngc
 # Clicking ztouch GUI button calls MDI command 3
-net ztouch3 halui.mdi-command-03     <=    pyvcp.ztouch
+net ztouch3 halui.mdi-command-09     <=    pyvcp.ztouch
 
