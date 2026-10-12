@@ -31,7 +31,9 @@ addf pendant_vacuum_toggle servo-thread
 # (connection is later via or2.1.in0 below)
 
 # machine power (F2) -> AND.in1
-net machine-is-enabled => vacuum_and.in1
+#net machine-is-enabled => vacuum_and.in1
+net machine-is-enabled => vacuum_and.in1     hm2_7i76e.0.7i76.0.0.output-06
+
 
 # AND.out -> hardware output
 net vacuum-pump vacuum_and.out => hm2_7i76e.0.7i76.0.0.output-07 qtdragon.vs-custom.vacuum-led time.0.start
@@ -72,3 +74,7 @@ net time-seconds-s32 conv-u32-s32.1.out => qtdragon.vs-custom.vacuum-timer-secon
 #net gui_ztouch <= pyvcp.ztouch  or2.0.in0
 net gui_and_pdnt_zprobe  or2.0.out
 net gui_and_pdnt_zprobe halui.mdi-command-08
+
+
+# Load tool 1 on startup because a tool must be loaded to use touchplate
+#loadusr -W mdi "M61 Q1"

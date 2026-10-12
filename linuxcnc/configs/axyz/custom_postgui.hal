@@ -29,7 +29,8 @@ addf pendant_vacuum_toggle servo-thread
 # (connection is later via or2.1.in0 below)
 
 # machine power (F2) -> AND.in1
-net machine-is-enabled => vacuum_and.in1
+#net machine-is-enabled => vacuum_and.in1
+net machine-is-enabled => vacuum_and.in1 hm2_7i76e.0.7i76.0.0.output-06
 
 # AND.out -> hardware output
 net vacuum-pump vacuum_and.out => hm2_7i76e.0.7i76.0.0.output-07
