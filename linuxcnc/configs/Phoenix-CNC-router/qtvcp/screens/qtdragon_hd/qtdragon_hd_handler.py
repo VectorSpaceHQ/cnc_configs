@@ -326,6 +326,10 @@ class HandlerClass:
         QHAL.newpin("comp-on", Qhal.HAL_BIT, Qhal.HAL_OUT)
         QHAL.newpin("spindle-lift-on", Qhal.HAL_BIT, Qhal.HAL_OUT)
 
+        # pendant macro-9 -> same as clicking the TOUCH PLATE button
+        pin = QHAL.newpin("touchplate-start", QHAL.HAL_BIT, QHAL.HAL_IN)
+        pin.value_changed.connect(self.touchplate_pin_changed)
+
     def init_preferences(self):
         if not self.w.PREFS_:
             self.add_status("CRITICAL - no preference file found, enable preferences in screenoptions widget")
@@ -653,6 +657,22 @@ class HandlerClass:
             self.w.lbl_mb_errors.setStyleSheet('')
         else:
             self.w.lbl_mb_errors.setStyleSheet('''background-color:rgb(202, 0, 0);''')
+
+    def touchplate_pin_changed(self, state):
+        # rising edge only; click() is ignored if the button is disabled (touchplate not enabled)
+        if not state:
+            return
+        if not self.w.btn_touchplate.isEnabled():
+            self.add_status("Touchplate not enabled - macro-9 ignored", WARNING)
+            return
+        if STATUS.get_current_tool() == 0:
+            self.add_status("No tool loaded - loading tool 1 (M61 Q1)")
+            ACTION.CALL_MDI_WAIT("M61 Q1")
+        if not STATUS.is_all_homed():
+            self.add_status("Must be homed to perform tool touchoff", WARNING)
+            return
+        # pendant macro-9: run the touchplate routine directly, no OK/Cancel dialog
+        self.touchoff("touchplate")
 
     def comp_count_changed(self, data):
         self.w.z_comp_eoffset_value.setText(format(data*.001, '.3f'))

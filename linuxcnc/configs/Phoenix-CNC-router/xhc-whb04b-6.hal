@@ -104,7 +104,8 @@ net pdnt.macro-5                     whb.button.macro-5       halui.mdi-command-
 net pdnt.macro-6                     whb.button.macro-6       halui.mdi-command-06   # use MDI command from main.ini
 net pdnt.macro-7                     whb.button.macro-7       halui.mdi-command-07   # use MDI command from main.ini
 net pdnt.reserved.for.spindle.dir    whb.button.macro-8                              # Hardcoded for spindle direction inside pendant
-net pdnt.macro-9                     whb.button.macro-9       halui.mdi-command-09   # use MDI command from main.ini
+# macro-9 now starts the qtdragon Touch Plate routine (wired in postgui_call_list.hal)
+#net pdnt.macro-9                     whb.button.macro-9       halui.mdi-command-09   # use MDI command from main.ini
 # net pdnt.reserved.for.ABS-REL        whb.button.macro-10                             # Hardcoded for swap Dro  Relative/Absolue
 net pdnt.macro-14                    whb.button.macro-14      halui.mdi-command-14   # use MDI command from main.ini
 net pdnt.reserved.for.flood          whb.button.macro-15                             # Hardcoded for halui.flood on/off

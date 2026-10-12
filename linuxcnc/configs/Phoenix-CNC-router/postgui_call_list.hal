@@ -1,0 +1,13 @@
+# These files are loaded post GUI, in the order they appear
+
+#source zprobe.hal
+source vfd.hal
+# source estop.hal
+source custom_postgui.hal
+#source joypad_jog_speed.hal
+#source joypad_xyz.hal
+
+# Pendant Probe-Z key (bare, Fn+key = macro-9) -> qtdragon Touch Plate procedure
+# or2.0.in1 already carries whb.button.probe-z (xhc-whb04b-6.hal); or2.0 is otherwise unused
+net pdnt.macro-9 whb.button.macro-9 => or2.0.in0
+net touchplate-req or2.0.out => qtdragon.touchplate-start
